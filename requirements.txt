@@ -1,0 +1,5 @@
+asyncpg
+httpx[http2,brotli]
+fastapi
+orjson
+pydantic[dotenv]

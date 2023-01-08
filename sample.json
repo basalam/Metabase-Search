@@ -1,0 +1,39 @@
+{
+  "total": 1,
+  "data": [
+    {
+      "description": null,
+      "archived": false,
+      "collection_position": null,
+      "table_id": null,
+      "bookmark": false,
+      "database_id": null,
+      "name": "Sample Dashboard",
+      "app_id": null,
+      "table_schema": null,
+      "collection_authority_level": null,
+      "updated_at": "2022-08-30T08:20:52.607119Z",
+      "moderated_status": null,
+      "dataset_query": null,
+      "id": 1,
+      "table_description": null,
+      "dashboardcard_count": null,
+      "context": null,
+      "scores": ["This part is not returing also frontend is does not require that"],
+      "initial_sync_status": null,
+      "table_name": null,
+      "collection": {
+        "id": null,
+        "name": null,
+        "authority_level": null,
+        "app_id": null
+      },
+      "model": "dashboard"
+    }
+  ],
+  "available_models": ["dashboard"],
+  "limit": 50,
+  "offset": 0,
+  "table_db_id": null,
+  "models": null
+}
