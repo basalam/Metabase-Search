@@ -63,7 +63,7 @@ DB__DBNAME
 DB__MIN_CONNECTIONS
 # Max connections of to database (defualts to 25)
 DB__MAX_CONNECTIONS
-Time-To-Live for caches in second (search and user info) (defualts to 600)
+# Time-To-Live for caches in second (search and user info) (defualts to 600)
 CACHE_TTL
 ```
 
