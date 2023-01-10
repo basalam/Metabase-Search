@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn:python3.10
+FROM tiangolo/uvicorn-gunicorn:python3.11
 
 ENV PYTHONUNBUFFERED 1
 ENV VARIABLE_NAME app
