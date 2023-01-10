@@ -7,7 +7,7 @@ from fastapi import FastAPI, Header
 from fastapi.exceptions import HTTPException
 from fastapi.responses import ORJSONResponse, Response
 from lib.hermes.backend.dict import Backend as cacheBackend
-from pydantic import BaseSettings, BaseModel
+from pydantic import BaseSettings, BaseModel, root_validator
 from urllib.parse import quote
 
 
@@ -19,16 +19,20 @@ class DBSettings(BaseModel):
     dbname: str
     min_connections: int = 1
     max_connections: int = 25
+    conn_str: None | str = None
+    search_query: None | str = None
 
-    def __init__(self) -> None:
+    @root_validator
+    def initialize(cls, values):
         with open("./search_query.sql", "rb") as f:
-            self.search_query = brotli.compress(f.read(), mode=brotli.MODE_TEXT)
+            values["search_query"] = brotli.compress(f.read(), mode=brotli.MODE_TEXT)
 
-        password = quote(self.password, safe="")
-        user = quote(self.user, safe="")
-        self.conn_str = (
-            f"postgres://{user}:{password}@{self.host}:{self.port}/{self.dbname}"
-        )
+        password = quote(values["password"], safe="")
+        user = quote(values["user"], safe="")
+        values[
+            "conn_str"
+        ] = f"postgres://{user}:{password}@{values['host']}:{values['port']}/{values['dbname']}"
+        return values
 
 
 class MBSettings(BaseModel):
