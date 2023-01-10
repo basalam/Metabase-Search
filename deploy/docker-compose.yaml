@@ -38,6 +38,7 @@ services:
     depends_on:
       - postgres
     environment:
+      TZ: Asia/Tehran
       WEB_CONCURRENCY: 2 # It will be equal to number of cores by defualt
       MB__BASE_URL: "https://metabase.local"
       MB__MAX_CONNECTIONS: "25"
