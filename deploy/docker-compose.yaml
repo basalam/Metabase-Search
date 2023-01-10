@@ -63,6 +63,7 @@ services:
       - /var/log/nginx/:/var/log/nginx/
       - ./my-cert.pem:/etc/ssl/my-cert.pem
       - ./my-cert.key:/etc/ssl/my-cert.key
+      - ./dhparams.pem:/etc/nginx/dhparams.pem
 
 volumes:
   metabase-db:
