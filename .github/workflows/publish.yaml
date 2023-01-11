@@ -20,7 +20,7 @@ jobs:
 
       # Workaround: https://github.com/docker/build-push-action/issues/461
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@39a1a82492fd1ad19af19d61b5f748e4cb6cd1af
+        uses: docker/setup-buildx-action@165fe681b849eec43aaa64d786b9ec53e690475f
 
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
