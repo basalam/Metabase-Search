@@ -2,13 +2,20 @@ import httpx
 import brotli
 import asyncpg
 from lib.hermes import Hermes
+from urllib.parse import quote
 from typing import Any, List, Dict
 from fastapi import FastAPI, Header
 from fastapi.exceptions import HTTPException
 from fastapi.responses import ORJSONResponse, Response
 from lib.hermes.backend.dict import Backend as cacheBackend
 from pydantic import BaseSettings, BaseModel, root_validator
-from urllib.parse import quote
+
+
+def add_filter(old_filter: str, filter_to_add: str, operator: str = "AND"):
+    if old_filter.startswith("WHERE"):
+        return f"{old_filter} {operator} {filter_to_add}"
+    else:
+        return f"WHERE {filter_to_add}"
 
 
 class DBSettings(BaseModel):
@@ -111,6 +118,7 @@ async def search(
     offset: int = 0,
     cookie: str = Header(),
 ):
+    conditions = ""
     archived = archived.upper()
     if archived not in ["TRUE", "FALSE"]:
         raise HTTPException(status_code=400, detail="Archived should be true or false")
@@ -119,8 +127,28 @@ async def search(
         get_mb_user.invalidate(cookie=cookie)
         return Response(r.content, r.status_code, headers=r.headers)
     user_id = r.json()["id"]
+    models_arr: List[str] = []
+    if models is not None:
+        for model in models.split(","):
+            models_arr.append(f"'{model.strip()}'")
+        if len(models_arr) > 0:
+            conditions = add_filter(
+                conditions, f'"model" in ({",".join(models_arr)})', "AND"
+            )
+    if table_db_id is not None:
+        conditions = add_filter(conditions, f'"database_id" = {table_db_id}', "AND")
     async with app.conn_pool.acquire() as connection:
         async with connection.transaction():
+            print(
+                brotli.decompress(config.db.search_query)
+                .decode("utf-8")
+                .replace("SEARCH_TERM", "'%" + q + "%'")
+                .replace("QUERY_LIMIT", str(limit))
+                .replace("QUERY_OFFSET", str(offset))
+                .replace("SEARCH_ARCHIVED", archived)
+                .replace("USER_ID", str(user_id))
+                .replace("CONDITIONS", conditions)
+            )
             result = await connection.fetch(
                 brotli.decompress(config.db.search_query)
                 .decode("utf-8")
@@ -129,10 +157,10 @@ async def search(
                 .replace("QUERY_OFFSET", str(offset))
                 .replace("SEARCH_ARCHIVED", archived)
                 .replace("USER_ID", str(user_id))
+                .replace("CONDITIONS", conditions)
             )
             available_models = []
             final_result: List[dict] = []
-            models_arr = None
             for i in result:
                 current: Dict[str, Any] = dict(i)
                 if current["model"] not in available_models:
@@ -143,24 +171,7 @@ async def search(
                     if k.startswith("collection_"):
                         current.pop(k)
                         current["collection"][k.replace("collection_", "")] = v
-
-                is_db_valid = True
-                if table_db_id:
-                    if current["database_id"] != table_db_id:
-                        is_db_valid = False
-
-                is_model_valid = True
-                if models:
-                    models_arr = models.split(",")
-                    is_model_valid = False
-                    for m in models_arr:
-                        if current["model"] == m:
-                            is_model_valid = True
-
-                is_valid = is_db_valid and is_model_valid
-
-                if is_valid:
-                    final_result.append(current)
+                final_result.append(current)
 
             return ORJSONResponse(
                 {
@@ -168,7 +179,7 @@ async def search(
                     "limit": limit,
                     "offset": offset,
                     "table_db_id": table_db_id,
-                    "models": models_arr,
+                    "models": [m.replace("'", "").strip() for m in models_arr],
                     "available_models": available_models,
                     "data": final_result,
                 }

@@ -67,10 +67,4 @@ DB__MAX_CONNECTIONS
 CACHE_TTL
 ```
 
-**Storngly Recommended**
-
-You can checkout [deploy](./deploy) directory to see a full example of how to deploy this using `docker-compose` and NginX
-
-## Known Issues
-
-- Pagination is handled on `SQL` Query, but filtering of models is handeled inside python code so, filtering for models is not fully working (we are working to fix that)
+**Storngly Recommended** You can checkout [deploy](./deploy) directory to see a full example of how to deploy this using `docker-compose` and NginX

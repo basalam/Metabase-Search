@@ -45,13 +45,15 @@ jobs:
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
-      - name: Build and push Docker image
+      - name: Build and push Docker image (Latest)
         id: build-and-push-release
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:latest
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:latest
+            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:${GITHUB_SHA:0:8}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
