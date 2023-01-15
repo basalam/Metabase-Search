@@ -139,16 +139,6 @@ async def search(
         conditions = add_filter(conditions, f'"database_id" = {table_db_id}', "AND")
     async with app.conn_pool.acquire() as connection:
         async with connection.transaction():
-            print(
-                brotli.decompress(config.db.search_query)
-                .decode("utf-8")
-                .replace("SEARCH_TERM", "'%" + q + "%'")
-                .replace("QUERY_LIMIT", str(limit))
-                .replace("QUERY_OFFSET", str(offset))
-                .replace("SEARCH_ARCHIVED", archived)
-                .replace("USER_ID", str(user_id))
-                .replace("CONDITIONS", conditions)
-            )
             result = await connection.fetch(
                 brotli.decompress(config.db.search_query)
                 .decode("utf-8")
