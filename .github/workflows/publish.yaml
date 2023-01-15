@@ -54,7 +54,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:latest
-            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:{{ env.COMMIT_HASH }}
+            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:${{ env.COMMIT_HASH }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
