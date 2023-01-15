@@ -9,6 +9,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  COMMIT_HASH: ${GITHUB_SHA:0:8}
 
 jobs:
   build:
@@ -53,7 +54,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:latest
-            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:${GITHUB_SHA:0:8}
+            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:{{ env.COMMIT_HASH }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
