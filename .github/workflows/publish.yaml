@@ -9,7 +9,6 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-  COMMIT_HASH: ${GITHUB_SHA:0:8}
 
 jobs:
   build:
@@ -44,9 +43,13 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}
 
+      - name: Set COMMIT_HASH
+        id: vars
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
-      - name: Build and push Docker image (Latest)
+      - name: Build and push Docker image
         id: build-and-push-release
         uses: docker/build-push-action@c56af957549030174b10d6867f20e78cfd7debc5
         with:
@@ -54,7 +57,7 @@ jobs:
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:latest
-            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:${{ env.COMMIT_HASH }}
+            ${{ env.REGISTRY }}/${{ steps.image_name_generator.outputs.lowercase }}:${{ steps.vars.outputs.COMMIT_HASH }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
