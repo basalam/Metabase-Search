@@ -113,7 +113,7 @@ async def search(
     q: str,
     archived: str = "FALSE",
     table_db_id: int | None = None,
-    models: str | None = None,
+    models: List[str] | None = None,
     limit: int = 50,
     offset: int = 0,
     cookie: str = Header(),
@@ -127,13 +127,13 @@ async def search(
         get_mb_user.invalidate(cookie=cookie)
         return Response(r.content, r.status_code, headers=r.headers)
     user_id = r.json()["id"]
-    models_arr: List[str] = []
     if models is not None:
-        for model in models.split(","):
-            models_arr.append(f"'{model.strip()}'")
-        if len(models_arr) > 0:
+        qouted_models: List[str] = []
+        for model in models:
+            qouted_models.append(f"'{model.strip()}'")
+        if len(qouted_models) > 0:
             conditions = add_filter(
-                conditions, f'"model" in ({",".join(models_arr)})', "AND"
+                conditions, f'"model" in ({",".join(qouted_models)})', "AND"
             )
     if table_db_id is not None:
         conditions = add_filter(conditions, f'"database_id" = {table_db_id}', "AND")
@@ -179,7 +179,7 @@ async def search(
                     "limit": limit,
                     "offset": offset,
                     "table_db_id": table_db_id,
-                    "models": [m.replace("'", "").strip() for m in models_arr],
+                    "models": models,
                     "available_models": available_models,
                     "data": final_result,
                 }
