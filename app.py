@@ -1,15 +1,16 @@
 import httpx
 import brotli
 import asyncpg
+from enum import Enum
 from lib.hermes import Hermes
 from urllib.parse import quote
-from typing import Any, List, Dict
+from typing import Any, Coroutine, List, Dict, Literal
 from fastapi import FastAPI, Header
 from fastapi.exceptions import HTTPException
 from fastapi.responses import ORJSONResponse, Response
-from lib.hermes.backend.dict import Backend as cacheBackend
+from lib.hermes.backend.dict import Backend as redisBackend
 from pydantic import BaseSettings, BaseModel, root_validator
-
+from pprint import pprint
 
 def add_filter(old_filter: str, filter_to_add: str, operator: str = "AND"):
     if old_filter.startswith("WHERE"):
@@ -17,6 +18,8 @@ def add_filter(old_filter: str, filter_to_add: str, operator: str = "AND"):
     else:
         return f"WHERE {filter_to_add}"
 
+class DBEngine(Enum):
+    PG = "pg"
 
 class DBSettings(BaseModel):
     host: str
@@ -24,6 +27,7 @@ class DBSettings(BaseModel):
     user: str
     password: str
     dbname: str
+    engine: DBEngine = DBEngine.PG
     min_connections: int = 1
     max_connections: int = 25
     conn_str: None | str = None
@@ -68,11 +72,11 @@ class MyFastAPI(FastAPI):
     mb_client: httpx.AsyncClient
 
 
-dict_cache = Hermes(cacheBackend, ttl=0)
+cache = Hermes(redisBackend, ttl=0)
 app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
 
 
-@dict_cache(
+@cache(
     ttl=config.cache_ttl,
     key=lambda cookie: brotli.compress(
         str.encode(cookie),
@@ -107,7 +111,7 @@ async def init_reqs():
         raise Exception("Connection is None.")
 
 
-@dict_cache(ttl=config.cache_ttl)
+@cache(ttl=config.cache_ttl)
 @app.get("/api/search")
 async def search(
     q: str,
@@ -118,15 +122,15 @@ async def search(
     offset: int = 0,
     cookie: str = Header(),
 ):
-    conditions = ""
+    conditions: str = ""
     archived = archived.upper()
     if archived not in ["TRUE", "FALSE"]:
         raise HTTPException(status_code=400, detail="Archived should be true or false")
-    r = await get_mb_user(cookie=cookie)
+    r: Any = await get_mb_user(cookie=cookie)
     if r.status_code not in range(200, 300):
         get_mb_user.invalidate(cookie=cookie)
         return Response(r.content, r.status_code, headers=r.headers)
-    user_id = r.json()["id"]
+    user_id: int = r.json()["id"]
     if models is not None:
         qouted_models: List[str] = []
         for model in models:

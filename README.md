@@ -1,6 +1,6 @@
 # Metabase Search
 
-Better searching for metabase
+Better searching for [metabase](https://github.com/metabase/metabase/)
 
 ## How it works?
 
@@ -34,7 +34,7 @@ First of all I recommend to run `gin_index.sql` file inside your PostgreSQL, it 
 
 Just deploy it like a normal fastapi project
 
-> You need python 3.10 or higher to run this project
+> You need python 3.11 or higher to run this project (That's a bit crazy, but we are using some pretty typing features)
 >
 > maximum number of connections to db = number of project replicas \* (number of uvicorn workers \* 25)
 
@@ -63,8 +63,10 @@ DB__DBNAME
 DB__MIN_CONNECTIONS
 # Maximum number of connections to database (defualts to 25)
 DB__MAX_CONNECTIONS
+# Database Engine (for now only pg is supported) (defualts to 'pg')
+DB__ENGINE
 # Time-To-Live for caches in second (search and user info) (defualts to 600)
 CACHE_TTL
 ```
 
-**Storngly Recommended** You can checkout [deploy](./deploy) directory to see a full example of how to deploy this using `docker-compose` and NginX
+**Storngly Recommended** You can checkout [deploy](./deploy) directory to see a full example of how to deploy this using `docker-compose` and NginX near a real metabase
