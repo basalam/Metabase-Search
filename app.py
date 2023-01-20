@@ -4,13 +4,12 @@ import asyncpg
 from enum import Enum
 from lib.hermes import Hermes
 from urllib.parse import quote
-from typing import Any, Coroutine, List, Dict, Literal
+from typing import Any, Coroutine, List, Dict
 from fastapi import FastAPI, Header
 from fastapi.exceptions import HTTPException
 from fastapi.responses import ORJSONResponse, Response
-from lib.hermes.backend.dict import Backend as redisBackend
+from lib.hermes.backend.dict import Backend as dictBackend
 from pydantic import BaseSettings, BaseModel, root_validator
-from pprint import pprint
 
 def add_filter(old_filter: str, filter_to_add: str, operator: str = "AND"):
     if old_filter.startswith("WHERE"):
@@ -72,7 +71,7 @@ class MyFastAPI(FastAPI):
     mb_client: httpx.AsyncClient
 
 
-cache = Hermes(redisBackend, ttl=0)
+cache = Hermes(dictBackend, ttl=0)
 app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
 
 
