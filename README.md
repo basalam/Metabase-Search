@@ -70,3 +70,11 @@ CACHE_TTL
 ```
 
 **Storngly Recommended** You can checkout [deploy](./deploy) directory to see a full example of how to deploy this using `docker-compose` and NginX near a real metabase
+
+## Contributing
+
+Feel free to contribute to open new PRs to this project
+
+We are using `black` formatter as python formatter and some other linters, checkers and fixers that you can find them at [.pre-commit-config.yaml](.pre-commit-config.yaml) file
+
+I would recommend to use `pre-commit`
