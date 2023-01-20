@@ -29,7 +29,7 @@ services:
       MB_DB_PASS: postgres
       MB_DB_DBNAME: metabase
       ## Any other metabase options should go here
-  
+
   metabase-search:
     container_name: metabase-search
     image: ghcr.io/basalam/metabase-search

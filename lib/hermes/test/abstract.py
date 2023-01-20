@@ -7,7 +7,6 @@ import lib.hermes.backend.dict
 
 
 class TestAbstract(test.TestCase):
-
     def setUp(self):
         self.testee = lib.hermes.Hermes(lib.hermes.backend.AbstractBackend, ttl=360)
         self.fixture = test.createFixture(self.testee)
@@ -17,19 +16,19 @@ class TestAbstract(test.TestCase):
     def testSimple(self):
         self.assertEqual(0, self.fixture.calls)
 
-        self.assertEqual('ateb+ahpla', self.fixture.simple('alpha', b='beta'))
+        self.assertEqual("ateb+ahpla", self.fixture.simple("alpha", b="beta"))
         self.assertEqual(1, self.fixture.calls)
 
-        self.assertEqual('ateb+ahpla', self.fixture.simple('alpha', 'beta'))
+        self.assertEqual("ateb+ahpla", self.fixture.simple("alpha", "beta"))
         self.assertEqual(2, self.fixture.calls)
 
     def testTagged(self):
         self.assertEqual(0, self.fixture.calls)
 
-        self.assertEqual('ae-hl', self.fixture.tagged('alpha', b='beta'))
+        self.assertEqual("ae-hl", self.fixture.tagged("alpha", b="beta"))
         self.assertEqual(1, self.fixture.calls)
 
-        self.assertEqual('ae-hl', self.fixture.tagged('alpha', 'beta'))
+        self.assertEqual("ae-hl", self.fixture.tagged("alpha", "beta"))
         self.assertEqual(2, self.fixture.calls)
 
     def testFunction(self):
@@ -37,56 +36,60 @@ class TestAbstract(test.TestCase):
 
         @self.testee
         def foo(a, b):
-            counter['foo'] += 1
-            return '{0}+{1}'.format(a, b)[::-1]
+            counter["foo"] += 1
+            return "{0}+{1}".format(a, b)[::-1]
 
-        key = lambda fn, *args, **kwargs: 'mk:{0}:{1}'.format(*args)
+        key = lambda fn, *args, **kwargs: "mk:{0}:{1}".format(*args)
 
-        @self.testee(tags=('a', 'z'), key=key, ttl=120)
+        @self.testee(tags=("a", "z"), key=key, ttl=120)
         def bar(a, b):
-            counter['bar'] += 1
-            return '{0}-{1}'.format(a, b)[::2]
+            counter["bar"] += 1
+            return "{0}-{1}".format(a, b)[::2]
 
-        self.assertEqual(0, counter['foo'])
+        self.assertEqual(0, counter["foo"])
 
-        self.assertEqual('ateb+ahpla', foo('alpha', 'beta'))
-        self.assertEqual(1, counter['foo'])
+        self.assertEqual("ateb+ahpla", foo("alpha", "beta"))
+        self.assertEqual(1, counter["foo"])
 
-        self.assertEqual('ateb+ahpla', foo('alpha', 'beta'))
-        self.assertEqual(2, counter['foo'])
+        self.assertEqual("ateb+ahpla", foo("alpha", "beta"))
+        self.assertEqual(2, counter["foo"])
 
         self.testee.clean()
-        self.assertEqual(0, counter['bar'])
+        self.assertEqual(0, counter["bar"])
 
-        self.assertEqual('apabt', bar('alpha', 'beta'))
-        self.assertEqual(1, counter['bar'])
+        self.assertEqual("apabt", bar("alpha", "beta"))
+        self.assertEqual(1, counter["bar"])
 
-        self.assertEqual('apabt', bar('alpha', 'beta'))
-        self.assertEqual(2, counter['bar'])
+        self.assertEqual("apabt", bar("alpha", "beta"))
+        self.assertEqual(2, counter["bar"])
 
     def testKey(self):
         self.assertEqual(0, self.fixture.calls)
 
-        self.assertEqual('apabt', self.fixture.key('alpha', 'beta'))
+        self.assertEqual("apabt", self.fixture.key("alpha", "beta"))
         self.assertEqual(1, self.fixture.calls)
 
-        self.assertEqual('apabt', self.fixture.key('alpha', 'beta'))
+        self.assertEqual("apabt", self.fixture.key("alpha", "beta"))
         self.assertEqual(2, self.fixture.calls)
 
     def testAll(self):
         self.assertEqual(0, self.fixture.calls)
 
-        self.assertEqual({'a': ['beta'], 'b': {'b': 2}}, self.fixture.all({'alpha': ['beta']}, [2]))
+        self.assertEqual(
+            {"a": ["beta"], "b": {"b": 2}}, self.fixture.all({"alpha": ["beta"]}, [2])
+        )
         self.assertEqual(1, self.fixture.calls)
 
-        self.assertEqual({'a': ['beta'], 'b': {'b': 2}}, self.fixture.all({'alpha': ['beta']}, [2]))
+        self.assertEqual(
+            {"a": ["beta"], "b": {"b": 2}}, self.fixture.all({"alpha": ["beta"]}, [2])
+        )
         self.assertEqual(2, self.fixture.calls)
 
     def testClean(self):
         self.assertEqual(0, self.fixture.calls)
 
-        self.assertEqual('ateb+ahpla', self.fixture.simple('alpha', 'beta'))
-        self.assertEqual('aldamg', self.fixture.tagged('gamma', 'delta'))
+        self.assertEqual("ateb+ahpla", self.fixture.simple("alpha", "beta"))
+        self.assertEqual("aldamg", self.fixture.tagged("gamma", "delta"))
         self.assertEqual(2, self.fixture.calls)
 
         self.testee.clean()
@@ -95,20 +98,20 @@ class TestAbstract(test.TestCase):
     def testCleanTagged(self):
         self.assertEqual(0, self.fixture.calls)
 
-        self.assertEqual('ateb+ahpla', self.fixture.simple('alpha', 'beta'))
-        self.assertEqual('aldamg', self.fixture.tagged('gamma', 'delta'))
+        self.assertEqual("ateb+ahpla", self.fixture.simple("alpha", "beta"))
+        self.assertEqual("aldamg", self.fixture.tagged("gamma", "delta"))
         self.assertEqual(2, self.fixture.calls)
 
-        self.testee.clean(('rock',))
+        self.testee.clean(("rock",))
 
-        self.assertEqual('ateb+ahpla', self.fixture.simple('alpha', 'beta'))
-        self.assertEqual('aldamg', self.fixture.tagged('gamma', 'delta'))
+        self.assertEqual("ateb+ahpla", self.fixture.simple("alpha", "beta"))
+        self.assertEqual("aldamg", self.fixture.tagged("gamma", "delta"))
         self.assertEqual(4, self.fixture.calls)
 
-        self.testee.clean(('rock', 'tree'))
+        self.testee.clean(("rock", "tree"))
 
-        self.assertEqual('ateb+ahpla', self.fixture.simple('alpha', 'beta'))
-        self.assertEqual('aldamg', self.fixture.tagged('gamma', 'delta'))
+        self.assertEqual("ateb+ahpla", self.fixture.simple("alpha", "beta"))
+        self.assertEqual("aldamg", self.fixture.tagged("gamma", "delta"))
         self.assertEqual(6, self.fixture.calls)
 
         self.testee.clean()
@@ -116,14 +119,13 @@ class TestAbstract(test.TestCase):
         self.assertEqual(6, self.fixture.calls)
 
     def testNested(self):
-        self.assertEqual('beta+alpha', self.fixture.nested('alpha', 'beta'))
+        self.assertEqual("beta+alpha", self.fixture.nested("alpha", "beta"))
         self.assertEqual(2, self.fixture.calls)
 
 
 class TestAbstractLock(test.TestCase):
-
     def setUp(self):
-        self.testee = lib.hermes.backend.AbstractLock('123')
+        self.testee = lib.hermes.backend.AbstractLock("123")
 
     def testAcquire(self):
         for _ in range(2):
@@ -166,7 +168,6 @@ class TestAbstractLock(test.TestCase):
 
 
 class TestWrapping(test.TestCase):
-
     def setUp(self):
         self.testee = lib.hermes.Hermes(lib.hermes.backend.dict.Backend)
         self.fixture = test.createFixture(self.testee)
@@ -174,25 +175,26 @@ class TestWrapping(test.TestCase):
     def testFunction(self):
         @self.testee
         def foo(a, b):
-            '''Overwhelmed everyone would be...'''
+            """Overwhelmed everyone would be..."""
 
             return a * b
 
         self.assertTrue(isinstance(foo, lib.hermes.Cached))
-        self.assertEqual('foo', foo.__name__)
-        self.assertEqual('Overwhelmed everyone would be...', foo.__doc__)
+        self.assertEqual("foo", foo.__name__)
+        self.assertEqual("Overwhelmed everyone would be...", foo.__doc__)
 
     def testMethod(self):
         self.assertTrue(isinstance(self.fixture.simple, lib.hermes.Cached))
-        self.assertEqual('simple', self.fixture.simple.__name__)
+        self.assertEqual("simple", self.fixture.simple.__name__)
         self.assertEqual(
-            'Here be dragons... seriously just a docstring test.', self.fixture.simple.__doc__)
+            "Here be dragons... seriously just a docstring test.",
+            self.fixture.simple.__doc__,
+        )
 
     def testInstanceIsolation(self):
         testee = lib.hermes.Hermes()
 
         class Fixture:
-
             def __init__(self, marker):
                 self.marker = marker
 
@@ -218,7 +220,6 @@ class TestWrapping(test.TestCase):
 
     def testMethodDescriptor(self):
         class Fixture:
-
             @self.testee
             @classmethod
             def classmethod(cls):
@@ -227,20 +228,19 @@ class TestWrapping(test.TestCase):
             @self.testee
             @staticmethod
             def staticmethod():
-                return 'static'
+                return "static"
 
-        self.assertEqual('Fixture', Fixture().classmethod())
-        self.assertEqual('static', Fixture().staticmethod())
+        self.assertEqual("Fixture", Fixture().classmethod())
+        self.assertEqual("static", Fixture().staticmethod())
 
     def testDoubleCache(self):
         class Fixture:
-
             @self.testee
             @self.testee
             def doublecache(self):
-                return 'descriptor vs callable'
+                return "descriptor vs callable"
 
-        self.assertEqual('descriptor vs callable', Fixture().doublecache())
+        self.assertEqual("descriptor vs callable", Fixture().doublecache())
 
     def testNumbaCpuDispatcher(self):
         # In case of application of ``jit`` to a method, ``CpuDispatcher`` is
@@ -248,7 +248,6 @@ class TestWrapping(test.TestCase):
         # ``CpuDispatcher`` is a callable and has ``__name__`` of the wrapped function.
 
         class CpuDispatcher:
-
             def __init__(self, fn):
                 self.fn = fn
 
@@ -277,7 +276,6 @@ class TestWrapping(test.TestCase):
 
     def testNamelessObjectWrapperFailure(self):
         class CpuDispatcher:
-
             def __init__(self, fn):
                 self.fn = fn
 
@@ -295,12 +293,15 @@ class TestWrapping(test.TestCase):
         with self.assertRaises(TypeError) as ctx:
             f(26, 10)
         self.assertEqual(
-            'Fn is callable but its name is undefined, consider overriding Mangler.nameEntry',
-            str(ctx.exception))
+            "Fn is callable but its name is undefined, consider overriding Mangler.nameEntry",
+            str(ctx.exception),
+        )
 
     def testClassAccess(self):
         self.assertIsInstance(self.fixture.__class__.simple, Cached)
-        self.assertIsInstance(self.fixture.__class__.simple._callable, types.FunctionType)
+        self.assertIsInstance(
+            self.fixture.__class__.simple._callable, types.FunctionType
+        )
 
         self.assertIsInstance(self.fixture.simple, Cached)
         self.assertIsInstance(self.fixture.simple._callable, types.MethodType)

@@ -4,14 +4,14 @@ import threading
 
 from . import AbstractBackend, AbstractLock
 
-__all__ = 'Lock', 'Backend'
+__all__ = "Lock", "Backend"
 
 
 class Lock(AbstractLock):
-    '''Key-unaware thread lock.'''
+    """Key-unaware thread lock."""
 
     _lock = None
-    '''Threading lock instance.'''
+    """Threading lock instance."""
 
     def __init__(self, key):
         self._lock = threading.RLock()
@@ -24,13 +24,13 @@ class Lock(AbstractLock):
 
 
 class BaseBackend(AbstractBackend):
-    '''Base dictionary backend without key expiration.'''
+    """Base dictionary backend without key expiration."""
 
     cache = None
-    '''A ``dict`` instance.'''
+    """A ``dict`` instance."""
 
     _lock = None
-    '''Lock instance.'''
+    """Lock instance."""
 
     def __init__(self, mangler):
         super().__init__(mangler)
@@ -68,23 +68,23 @@ class BaseBackend(AbstractBackend):
 
 
 class Backend(BaseBackend):
-    '''
+    """
     Test purpose backend implementation. ``save`` and ``delete`` are
     not atomic in general. Though because writes are synchronised it may
     be suitable for limited number of real cases with small cache size.
-    '''
+    """
 
     _ttlHeap = None
-    '''TTL heap used by the thread to remove the expired entries.'''
+    """TTL heap used by the thread to remove the expired entries."""
 
     _ttlWatchThread = None
-    '''An instance of TTL watcher thread.'''
+    """An instance of TTL watcher thread."""
 
     _ttlWatchSleep = 1
-    '''Seconds for the expiration watcher to sleep in the loop.'''
+    """Seconds for the expiration watcher to sleep in the loop."""
 
     _ttlWatchThreadRunning = False
-    '''Run flag of the while-loop of the thread.'''
+    """Run flag of the while-loop of the thread."""
 
     def __init__(self, mangler):
         super().__init__(mangler)

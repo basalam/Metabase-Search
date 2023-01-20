@@ -11,14 +11,17 @@ from fastapi.responses import ORJSONResponse, Response
 from lib.hermes.backend.dict import Backend as dictBackend
 from pydantic import BaseSettings, BaseModel, root_validator
 
+
 def add_filter(old_filter: str, filter_to_add: str, operator: str = "AND"):
     if old_filter.startswith("WHERE"):
         return f"{old_filter} {operator} {filter_to_add}"
     else:
         return f"WHERE {filter_to_add}"
 
+
 class DBEngine(Enum):
     PG = "pg"
+
 
 class DBSettings(BaseModel):
     host: str

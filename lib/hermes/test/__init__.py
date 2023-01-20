@@ -21,20 +21,21 @@ def load_tests(loader, tests, pattern):
 
 class TestCase(unittest.TestCase):
     testee = None
-    '''HermesCache object.'''
+    """HermesCache object."""
 
     fixture = None
-    '''Object under test.'''
+    """Object under test."""
 
     def _arghash(self, *args, **kwargs):
-        '''
+        """
         Not very neat as it penetrates into an implementation detail,
         though otherwise it'll be harder to make assertion on keys.
-        '''
+        """
 
         arguments = args, tuple(sorted(kwargs.items()))
         return hashlib.md5(
-            pickle.dumps(arguments, protocol=pickle.HIGHEST_PROTOCOL)).hexdigest()[::2]
+            pickle.dumps(arguments, protocol=pickle.HIGHEST_PROTOCOL)
+        ).hexdigest()[::2]
 
 
 def createFixture(cache):
@@ -43,53 +44,55 @@ def createFixture(cache):
 
         @cache
         def simple(self, a, b):
-            '''Here be dragons... seriously just a docstring test.'''
+            """Here be dragons... seriously just a docstring test."""
 
             self.calls += 1
-            return '{0}+{1}'.format(a, b)[::-1]
+            return "{0}+{1}".format(a, b)[::-1]
 
         @cache
         def nested(self, a, b):
             self.calls += 1
             return self.simple(b, a)[::-1]
 
-        @cache(tags=('rock', 'tree'))
+        @cache(tags=("rock", "tree"))
         def tagged(self, a, b):
             self.calls += 1
-            return '{0}-{1}'.format(a, b)[::-2]
+            return "{0}-{1}".format(a, b)[::-2]
 
-        @cache(tags=('rock', 'ice'))
+        @cache(tags=("rock", "ice"))
         def tagged2(self, a, b):
             self.calls += 1
-            return '{0}%{1}'.format(a, b)[::-2]
+            return "{0}%{1}".format(a, b)[::-2]
 
-        @cache(tags=('ash', 'stone'), key=lambda fn, a, b: f'mykey:{a}:{b}')
+        @cache(tags=("ash", "stone"), key=lambda fn, a, b: f"mykey:{a}:{b}")
         def key(self, a, b):
             self.calls += 1
-            return '{0}*{1}'.format(a, b)[::2]
+            return "{0}*{1}".format(a, b)[::2]
 
         @cache(
-            tags=('a', 'z'), key=lambda fn, *a: 'mk:{0}:{1}'.format(*a).replace(' ', ''), ttl=1200
+            tags=("a", "z"),
+            key=lambda fn, *a: "mk:{0}:{1}".format(*a).replace(" ", ""),
+            ttl=1200,
         )
         def all(self, a, b):
             self.calls += 1
-            return {'a': a['alpha'], 'b': {'b': b[0]}}
+            return {"a": a["alpha"], "b": {"b": b[0]}}
 
     return Fixture()
 
 
 class FakeBackendServer:
     port = None
-    '''Fake server port.'''
+    """Fake server port."""
 
     log = None
-    '''Activity log.'''
+    """Activity log."""
 
     thread = None
-    '''Server connection-accepting thread.'''
+    """Server connection-accepting thread."""
 
     closing = None
-    '''Whether connection is closing.'''
+    """Whether connection is closing."""
 
     def __init__(self):
         self.log = []
@@ -98,7 +101,7 @@ class FakeBackendServer:
         self.closing = False
 
         serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serverSocket.bind(('', 0))
+        serverSocket.bind(("", 0))
         serverSocket.listen(1)
 
         self.port = serverSocket.getsockname()[1]
@@ -110,7 +113,7 @@ class FakeBackendServer:
         self.closing = True
 
         clientSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        clientSock.connect(('localhost', self.port))
+        clientSock.connect(("localhost", self.port))
 
         clientSock.close()
 
@@ -120,15 +123,15 @@ class FakeBackendServer:
         clientSocket, _ = serverSocket.accept()
 
         if not self.closing:
-            self.log.append('connected')
+            self.log.append("connected")
 
         try:
             chunk = clientSocket.recv(1024)
             if not self.closing:
                 if not chunk:
-                    self.log.append('closed')
+                    self.log.append("closed")
                 else:
-                    self.log.append('received {}'.format(chunk))
+                    self.log.append("received {}".format(chunk))
         finally:
             clientSocket.close()
             serverSocket.close()
@@ -136,23 +139,23 @@ class FakeBackendServer:
 
 @mock.patch.dict(__builtins__, print=mock.MagicMock())
 class TestReadme(unittest.TestCase):
-
     def testUsage(self):
         import lib.hermes.backend.redis
 
-        cache = lib.hermes.Hermes(lib.hermes.backend.redis.Backend, ttl=600, host='localhost', db=1)
+        cache = lib.hermes.Hermes(
+            lib.hermes.backend.redis.Backend, ttl=600, host="localhost", db=1
+        )
 
         @cache
         def foo(a, b):
             return a * b
 
         class Example:
-
-            @cache(tags=('math', 'power'), ttl=1200)
+            @cache(tags=("math", "power"), ttl=1200)
             def bar(self, a, b):
-                return a ** b
+                return a**b
 
-            @cache(tags=('math', 'avg'), key=lambda fn, a, b: f'avg:{a}:{b}')
+            @cache(tags=("math", "avg"), key=lambda fn, a, b: f"avg:{a}:{b}")
             def baz(self, a, b):
                 return (a + b) / 2.0
 
@@ -166,7 +169,7 @@ class TestReadme(unittest.TestCase):
         example.bar.invalidate(2, 10)
         example.baz.invalidate(2, 10)
 
-        cache.clean(['math'])  # invalidate entries tagged 'math'
+        cache.clean(["math"])  # invalidate entries tagged 'math'
         cache.clean()  # flush cache
 
     def testNonTagged(self):
@@ -192,7 +195,7 @@ class TestReadme(unittest.TestCase):
 
         cache = lib.hermes.Hermes(lib.hermes.backend.dict.Backend)
 
-        @cache(tags=('tag1', 'tag2'))
+        @cache(tags=("tag1", "tag2"))
         def foo(a, b):
             return a * b
 
@@ -210,7 +213,7 @@ class TestReadme(unittest.TestCase):
 
         cache = lib.hermes.Hermes(lib.hermes.backend.dict.Backend)
 
-        @cache(tags=('tag1', 'tag2'))
+        @cache(tags=("tag1", "tag2"))
         def foo(a, b):
             return a * b
 
@@ -223,7 +226,7 @@ class TestReadme(unittest.TestCase):
         #    'cache:entry:foo:a1c97600eac6febb:5cae80f5e7d58329': 4
         #  }
 
-        cache.clean(['tag1'])
+        cache.clean(["tag1"])
         foo(2, 2)
 
         print(cache.backend.dump())
