@@ -1,71 +1,16 @@
-import httpx
-import brotli
+from typing import Any, Dict, List
+
 import asyncpg
-from enum import Enum
-from lib.hermes import Hermes
-from urllib.parse import quote
-from typing import Any, Coroutine, List, Dict
+import httpx
+from brotli import MODE_TEXT, compress, decompress
 from fastapi import FastAPI, Header
 from fastapi.exceptions import HTTPException
 from fastapi.responses import ORJSONResponse, Response
+
+from config import config
+from database import add_filter, generate_query
+from lib.hermes import Hermes
 from lib.hermes.backend.dict import Backend as dictBackend
-from pydantic import BaseSettings, BaseModel, root_validator
-
-
-def add_filter(old_filter: str, filter_to_add: str, operator: str = "AND"):
-    if old_filter.startswith("WHERE"):
-        return f"{old_filter} {operator} {filter_to_add}"
-    else:
-        return f"WHERE {filter_to_add}"
-
-
-class DBEngine(Enum):
-    PG = "pg"
-
-
-class DBSettings(BaseModel):
-    host: str
-    port: str
-    user: str
-    password: str
-    dbname: str
-    engine: DBEngine = DBEngine.PG
-    min_connections: int = 1
-    max_connections: int = 25
-    conn_str: None | str = None
-    search_query: None | str = None
-
-    @root_validator
-    def initialize(cls, values):
-        with open("./search_query.sql", "rb") as f:
-            values["search_query"] = brotli.compress(f.read(), mode=brotli.MODE_TEXT)
-
-        password = quote(values["password"], safe="")
-        user = quote(values["user"], safe="")
-        values[
-            "conn_str"
-        ] = f"postgres://{user}:{password}@{values['host']}:{values['port']}/{values['dbname']}"
-        return values
-
-
-class MBSettings(BaseModel):
-    base_url: str
-    max_connections: int = 25
-
-
-class Settings(BaseSettings):
-    mb: MBSettings
-    db: DBSettings
-    cache_ttl: int = 600
-
-    class Config:
-        case_sensitive = False
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        env_nested_delimiter = "__"
-
-
-config = Settings()  # type: ignore
 
 
 class MyFastAPI(FastAPI):
@@ -80,9 +25,9 @@ app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
 
 @cache(
     ttl=config.cache_ttl,
-    key=lambda cookie: brotli.compress(
+    key=lambda cookie: compress(
         str.encode(cookie),
-        mode=brotli.MODE_TEXT,
+        mode=MODE_TEXT,
     ),
 )
 async def get_mb_user(cookie: str):
@@ -146,14 +91,14 @@ async def search(
     async with app.conn_pool.acquire() as connection:
         async with connection.transaction():
             result = await connection.fetch(
-                brotli.decompress(config.db.search_query)
-                .decode("utf-8")
-                .replace("SEARCH_TERM", "'%" + q + "%'")
-                .replace("QUERY_LIMIT", str(limit))
-                .replace("QUERY_OFFSET", str(offset))
-                .replace("SEARCH_ARCHIVED", archived)
-                .replace("USER_ID", str(user_id))
-                .replace("CONDITIONS", conditions)
+                generate_query(
+                    q=q,
+                    limit=limit,
+                    offset=offset,
+                    archived=archived,
+                    user_id=user_id,
+                    conditions=conditions,
+                )
             )
             available_models = []
             final_result: List[dict] = []
