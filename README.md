@@ -15,6 +15,7 @@ the goal is to reach a response that look likes `sample.json` file
 - fastapi (with orjson)
 - httpx (with http2 and brotli enabled)
 - aiocache (customized)
+- pydantic
 
 At every request we are sending a request to metabase current user api to verify the user and also getting the user_id (don't worry we are caching that response for 10 minutes)
 
