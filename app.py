@@ -113,6 +113,18 @@ async def search(
     offset: int = 0,
     cookie: str = Header(),
 ):
+    if len(q) < 3:
+        return ORJSONResponse(
+            {
+                "total": 0,
+                "limit": limit,
+                "offset": offset,
+                "table_db_id": table_db_id,
+                "models": models,
+                "available_models": [],
+                "data": [],
+            }
+        )
     conditions: str = ""
     archived = archived.upper()
     if archived not in ["TRUE", "FALSE"]:
