@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import List
 
 import asyncpg
 import httpx
@@ -168,7 +168,7 @@ async def search(
             await cache_backend.delete(key=decompress(cookie).decode("utf-8"))
             return Response(r.content, r.status_code, headers=r.headers)
         resp = r.json()
-    if isinstance(r, str):
+    elif isinstance(r, str):
         resp = orjson.loads(r)
 
     user_id: int = resp["id"]
@@ -197,15 +197,16 @@ async def search(
             available_models = []
             final_result: List[dict] = []
             for i in result:
-                current: Dict[str, Any] = dict(i)
+                current = {
+                    "model": i["model"],
+                    "collection": {
+                        k.replace("collection_", ""): v
+                        for k, v in i.items()
+                        if k.startswith("collection_")
+                    },
+                }
                 if current["model"] not in available_models:
                     available_models.append(current["model"])
-
-                current["collection"] = {}
-                for k, v in i.items():
-                    if k.startswith("collection_"):
-                        current.pop(k)
-                        current["collection"][k.replace("collection_", "")] = v
                 final_result.append(current)
 
             return ORJSONResponse(
