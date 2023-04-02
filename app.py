@@ -198,6 +198,24 @@ async def search(
             final_result: List[dict] = []
             for i in result:
                 current = {
+                    "description": i["description"],
+                    "archived": i["archived"],
+                    "collection_position": i["collection_position"],
+                    "table_id": i["table_id"],
+                    "bookmark": i["bookmark"],
+                    "database_id": i["database_id"],
+                    "name": i["name"],
+                    "app_id": i["app_id"],
+                    "table_schema": i["table_schema"],
+                    "collection_authority_level": i["collection_authority_level"],
+                    "updated_at": i["updated_at"],
+                    "moderated_status": i["moderated_status"],
+                    "dataset_query": i["dataset_query"],
+                    "id": i["id"],
+                    "table_description": i["table_description"],
+                    "dashboardcard_count": i["dashboardcard_count"],
+                    "initial_sync_status": i["initial_sync_status"],
+                    "table_name": i["table_name"],
                     "model": i["model"],
                     "collection": {
                         k.replace("collection_", ""): v

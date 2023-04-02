@@ -18,8 +18,10 @@
       "id": 1,
       "table_description": null,
       "dashboardcard_count": null,
-      "context": null,
-      "scores": ["This part is not returing also frontend is does not require that"],
+      "context": "this part is not returing also frontend is does not require that",
+      "scores": [
+        "This part is not returing also frontend is does not require that"
+      ],
       "initial_sync_status": null,
       "table_name": null,
       "collection": {
@@ -31,7 +33,9 @@
       "model": "dashboard"
     }
   ],
-  "available_models": ["dashboard"],
+  "available_models": [
+    "dashboard"
+  ],
   "limit": 50,
   "offset": 0,
   "table_db_id": null,
