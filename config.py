@@ -9,6 +9,12 @@ class DBEngine(Enum):
     PG = "pg"
 
 
+class CacheEngine(Enum):
+    REDIS = "redis"
+    MEMCACHED = "memcached"
+    MEMORY = "memory"
+
+
 class DBSettings(BaseModel):
     host: str
     port: str
@@ -39,10 +45,21 @@ class MBSettings(BaseModel):
     max_connections: int = 25
 
 
+class CacheSettings(BaseModel):
+    ttl: int = 600
+    engine: CacheEngine = CacheEngine.MEMORY
+    endpoint: str | None = None
+    port: int | None = None
+    db: int | None = None
+    password: str | None = None
+    pool_min_size: int | None
+    pool_max_size: int | None
+
+
 class Settings(BaseSettings):
     mb: MBSettings
     db: DBSettings
-    cache_ttl: int = 600
+    cache: CacheSettings
 
     class Config:
         case_sensitive = False

@@ -66,7 +66,21 @@ DB__MAX_CONNECTIONS
 # Database Engine (for now only pg is supported) (defualts to 'pg')
 DB__ENGINE
 # Time-To-Live for caches in second (search and user info) (defualts to 600)
-CACHE_TTL
+CACHE__TTL
+# Engine for caches (one of redis, memcached or memory) (defualts to memory)
+CACHE__ENGINE
+# Endpoint for caches (for example: 127.0.0.1) (defualts to None)
+CACHE__ENDPOINT
+# Port for caches (for example: 6379) (defualts to None)
+CACHE__PORT
+# DB for caches (for example: 0) (defualts to None)
+CACHE__DB
+# DB for caches (for example: 3ecr&t) (defualts to None)
+CACHE__PASSWORD
+# Minimum size for cache connection pool (for example: 1) (defualts to None)
+CACHE__POOL_MIN_SIZE
+# Maximum size for cache connection pool (for example: 12) (defualts to None)
+CACHE__POOL_MAX_SIZE
 ```
 
 **Storngly Recommended** You can checkout [deploy](./deploy) directory to see a full example of how to deploy this using `docker-compose` and NginX near a real metabase

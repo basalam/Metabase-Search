@@ -8,10 +8,14 @@ from fastapi import FastAPI, Header
 from fastapi.exceptions import HTTPException
 from fastapi.responses import ORJSONResponse, Response
 
-from config import config
+from config import config, CacheEngine
 from database import add_filter, generate_query
-from aiocache import Cache, cached
-from aiocache.serializers import PickleSerializer, BaseSerializer
+from aiocache import cached, AIOCACHE_CACHES
+from aiocache.base import BaseCache
+from aiocache.backends.memory import SimpleMemoryCache
+from aiocache.backends.redis import RedisCache
+from aiocache.backends.memcached import MemcachedCache
+from aiocache.serializers import BaseSerializer
 
 
 class BrotliSerializer(BaseSerializer):
@@ -56,17 +60,45 @@ def brotli_cache_key_from_args(self, func, args, kwargs):
     return compress(str.encode(key, encoding="utf-8"), mode=MODE_TEXT)
 
 
-cache = Cache(Cache.MEMORY, namespace="main")
-cache.serializer = BrotliSerializer()
+cache_backend: BaseCache = BaseCache()
+cache_kwargs: dict = {}
+match config.cache.engine:
+    case CacheEngine.MEMORY:
+        cache_kwargs: dict = {
+            "namespace": "main",
+        }
+        cache_backend = SimpleMemoryCache(serializer=BrotliSerializer(), **cache_kwargs)
+    case CacheEngine.REDIS:
+        cache_kwargs = {
+            "endpoint": config.cache.endpoint,
+            "port": config.cache.port,
+            "db": config.cache.db,
+            "password": config.cache.password,
+            "pool_min_size": config.cache.pool_min_size,
+            "pool_max_size": config.cache.pool_max_size,
+            "namespace": "main",
+        }
+        cache_backend = RedisCache(serializer=BrotliSerializer(), **cache_kwargs)
+    case CacheEngine.MEMCACHED:
+        cache_kwargs = {
+            "endpoint": config.cache.endpoint,
+            "port": config.cache.port,
+            "pool_size": config.cache.pool_max_size,
+            "namespace": "main",
+        }
+        cache_backend = MemcachedCache(serializer=BrotliSerializer(), **cache_kwargs)
+    case default:
+        raise Exception("Invalid Cache Engine.!")
+
 app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
 
 
 @cached(
-    ttl=config.cache_ttl,
-    cache=Cache.MEMORY,
+    ttl=config.cache.ttl,
+    cache=AIOCACHE_CACHES[cache_backend.NAME],
     serializer=BrotliSerializer(),
     key_builder=cookie_cache_key_builder,
-    namespace="main",
+    **cache_kwargs,
 )
 async def get_mb_user(cookie: str) -> httpx.Response:
     return await app.mb_client.get("/api/user/current", headers={"Cookie": cookie})
@@ -93,15 +125,15 @@ async def init_reqs():
         app.conn_pool = conn_pool
 
     else:
-        raise Exception("Connection is None.")
+        raise Exception("Connection Pool is None.")
 
 
 @cached(
-    ttl=config.cache_ttl,
-    cache=Cache.MEMORY,
-    serializer=PickleSerializer(),
-    namespace="main",
+    ttl=config.cache.ttl,
+    cache=AIOCACHE_CACHES[cache_backend.NAME],
+    serializer=BrotliSerializer(),
     key_builder=brotli_cache_key_from_args,
+    **cache_kwargs,
 )
 @app.get("/api/search")
 async def search(
@@ -133,7 +165,7 @@ async def search(
     resp: dict = {}
     if isinstance(r, httpx.Response):
         if r.status_code not in range(200, 300):
-            await cache.delete(key=decompress(cookie).decode("utf-8"))
+            await cache_backend.delete(key=decompress(cookie).decode("utf-8"))
             return Response(r.content, r.status_code, headers=r.headers)
         resp = r.json()
     if isinstance(r, str):
