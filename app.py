@@ -2,6 +2,7 @@ from typing import Any, Dict, List
 
 import asyncpg
 import httpx
+import orjson
 from brotli import MODE_TEXT, compress, decompress
 from fastapi import FastAPI, Header
 from fastapi.exceptions import HTTPException
@@ -22,7 +23,11 @@ class BrotliSerializer(BaseSerializer):
         self.encoding = encoding
 
     def dumps(self, value):
-        return compress(str.encode(value, encoding=self.encoding), mode=self.mode)
+        if isinstance(value, httpx.Response):
+            return compress(
+                orjson.dumps(value.json()),
+                mode=self.mode,
+            )
 
     def loads(self, value):
         if value is None:
@@ -36,7 +41,7 @@ class MyFastAPI(FastAPI):
     mb_client: httpx.AsyncClient
 
 
-def cookie_cache_key_builder(func, cookie, args, kwargs):
+def cookie_cache_key_builder(func, cookie):
     return compress(str.encode(cookie, encoding="utf-8"), mode=MODE_TEXT)
 
 
@@ -63,7 +68,7 @@ app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
     key_builder=cookie_cache_key_builder,
     namespace="main",
 )
-async def get_mb_user(cookie: str):
+async def get_mb_user(cookie: str) -> httpx.Response:
     return await app.mb_client.get("/api/user/current", headers={"Cookie": cookie})
 
 
@@ -112,11 +117,17 @@ async def search(
     archived = archived.upper()
     if archived not in ["TRUE", "FALSE"]:
         raise HTTPException(status_code=400, detail="Archived should be true or false")
-    r: Any = await get_mb_user(cookie=cookie)
-    if r.status_code not in range(200, 300):
-        await cache.delete(key=decompress(cookie).decode("utf-8"))
-        return Response(r.content, r.status_code, headers=r.headers)
-    user_id: int = r.json()["id"]
+    r: str | httpx.Response = await get_mb_user(cookie=cookie)
+    resp: dict = {}
+    if isinstance(r, httpx.Response):
+        if r.status_code not in range(200, 300):
+            await cache.delete(key=decompress(cookie).decode("utf-8"))
+            return Response(r.content, r.status_code, headers=r.headers)
+        resp = r.json()
+    if isinstance(r, str):
+        resp = orjson.loads(r)
+
+    user_id: int = resp["id"]
     if models is not None:
         qouted_models: List[str] = []
         for model in models:
