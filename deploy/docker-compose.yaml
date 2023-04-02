@@ -16,6 +16,7 @@ services:
 
   metabase:
     container_name: metabase
+    restart: always
     image: metabase/metabase:v0.45.1
     ports:
       - 127.0.0.1:3000:3000 # recommended for debuging, etc.
@@ -32,6 +33,7 @@ services:
 
   metabase-search:
     container_name: metabase-search
+    restart: always
     image: ghcr.io/basalam/metabase-search
     ports:
       - 127.0.0.1:3001:80 # recommended for debuging, etc.
@@ -49,7 +51,8 @@ services:
       DB__DBNAME: "metabase"
       DB__MIN_CONNECTIONS: "1"
       DB__MAX_CONNECTIONS: "25"
-      CACHE_TTL: "300"
+      CACHE__TTL: "300"
+      # Here, add other ENVs (depends on your needs)
 
   nginx:
     image: nginx:stable-alpine
