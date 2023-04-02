@@ -9,8 +9,25 @@ from fastapi.responses import ORJSONResponse, Response
 
 from config import config
 from database import add_filter, generate_query
-from lib.hermes import Hermes
-from lib.hermes.backend.dict import Backend as dictBackend
+from aiocache import Cache, cached
+from aiocache.serializers import PickleSerializer, BaseSerializer
+
+
+class BrotliSerializer(BaseSerializer):
+    DEFAULT_ENCODING = None
+
+    def __init__(self, *args, mode=MODE_TEXT, encoding="utf-8", **kwargs):
+        super().__init__(*args, **kwargs)
+        self.mode = mode
+        self.encoding = encoding
+
+    def dumps(self, value):
+        return compress(str.encode(value, encoding=self.encoding), mode=self.mode)
+
+    def loads(self, value):
+        if value is None:
+            return None
+        return decompress(value).decode(self.encoding)  # noqa: S301
 
 
 class MyFastAPI(FastAPI):
@@ -19,16 +36,32 @@ class MyFastAPI(FastAPI):
     mb_client: httpx.AsyncClient
 
 
-cache = Hermes(dictBackend, ttl=0)
+def cookie_cache_key_builder(func, args, kwargs):
+    return compress(str.encode(kwargs["cookie"], encoding="utf-8"), mode=MODE_TEXT)
+
+
+def brotli_cache_key_from_args(self, func, args, kwargs):
+    ordered_kwargs = sorted(kwargs.items())
+    key = (
+        (func.__module__ or "")
+        + func.__name__
+        + str(args[1:] if self.noself else args)
+        + str(ordered_kwargs)
+    )
+    return compress(str.encode(key, encoding="utf-8"), mode=MODE_TEXT)
+
+
+cache = Cache(Cache.MEMORY, namespace="main")
+cache.serializer = BrotliSerializer()
 app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
 
 
-@cache(
+@cached(
     ttl=config.cache_ttl,
-    key=lambda cookie: compress(
-        str.encode(cookie),
-        mode=MODE_TEXT,
-    ),
+    cache=Cache.MEMORY,
+    serializer=BrotliSerializer(),
+    key_builder=cookie_cache_key_builder,
+    namespace="main",
 )
 async def get_mb_user(cookie: str):
     return await app.mb_client.get("/api/user/current", headers={"Cookie": cookie})
@@ -58,7 +91,13 @@ async def init_reqs():
         raise Exception("Connection is None.")
 
 
-@cache(ttl=config.cache_ttl)
+@cached(
+    ttl=config.cache_ttl,
+    cache=Cache.MEMORY,
+    serializer=PickleSerializer(),
+    namespace="main",
+    key_builder=brotli_cache_key_from_args,
+)
 @app.get("/api/search")
 async def search(
     q: str,
@@ -75,7 +114,7 @@ async def search(
         raise HTTPException(status_code=400, detail="Archived should be true or false")
     r: Any = await get_mb_user(cookie=cookie)
     if r.status_code not in range(200, 300):
-        get_mb_user.invalidate(cookie=cookie)
+        await cache.delete(key=decompress(cookie).decode("utf-8"))
         return Response(r.content, r.status_code, headers=r.headers)
     user_id: int = r.json()["id"]
     if models is not None:

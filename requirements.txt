@@ -6,3 +6,4 @@ pydantic[dotenv]
 pylibmc
 redis
 uvicorn
+aiocache[redis,memcached,msgpack]

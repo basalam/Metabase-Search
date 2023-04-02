@@ -49,6 +49,7 @@ services:
       DB__DBNAME: "metabase"
       DB__MIN_CONNECTIONS: "1"
       DB__MAX_CONNECTIONS: "25"
+      CACHE_TTL: "300"
 
   nginx:
     image: nginx:stable-alpine
