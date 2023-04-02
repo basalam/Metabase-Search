@@ -36,8 +36,8 @@ class MyFastAPI(FastAPI):
     mb_client: httpx.AsyncClient
 
 
-def cookie_cache_key_builder(func, args, kwargs):
-    return compress(str.encode(kwargs["cookie"], encoding="utf-8"), mode=MODE_TEXT)
+def cookie_cache_key_builder(func, cookie, args, kwargs):
+    return compress(str.encode(cookie, encoding="utf-8"), mode=MODE_TEXT)
 
 
 def brotli_cache_key_from_args(self, func, args, kwargs):
