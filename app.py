@@ -199,13 +199,18 @@ async def search(
             i: dict[str, Any]
             for i in result:
                 current = {
-                    k: v for k, v in i.items() if not k.startswith("collection_")
+                    k: v
+                    for k, v in i.items()
+                    # if not k.startswith("collection_") // Metabase is returning that :/
                 }
+                current["collection"] = {}
                 for k, v in i.items():
                     if k.startswith("collection_"):
-                        current[k.removeprefix("collection_")] = v
+                        current["collection"][k.removeprefix("collection_")] = v
                 if current["model"] not in available_models:
                     available_models.append(current["model"])
+                current["dataset_query"] = orjson.loads(current["dataset_query"])
+                current["context"] = None
                 final_result.append(current)
 
             return ORJSONResponse(

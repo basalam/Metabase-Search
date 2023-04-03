@@ -30,10 +30,10 @@
       "scores": [
         {
           "score": 1,
-          "name": "text-consecutivity",
+          "name": "this-section is not returning",
           "weight": 4,
-          "match": "Search Testtttt",
-          "match-context-thunk": "metabase.search.scoring$text_scores_with$iter__95167__95173$fn__95174$iter__95169__95175$fn__95176$fn__95177$fn__95180@6589ed8b",
+          "match": "Sample",
+          "match-context-thunk": "",
           "column": "name"
         }
       ],
