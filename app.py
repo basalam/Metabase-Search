@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 import asyncpg
 import httpx
@@ -196,33 +196,14 @@ async def search(
             )
             available_models = []
             final_result: List[dict] = []
+            i: dict[str, Any]
             for i in result:
                 current = {
-                    "description": i["description"],
-                    "archived": i["archived"],
-                    "collection_position": i["collection_position"],
-                    "table_id": i["table_id"],
-                    "bookmark": i["bookmark"],
-                    "database_id": i["database_id"],
-                    "name": i["name"],
-                    "app_id": i["app_id"],
-                    "table_schema": i["table_schema"],
-                    "collection_authority_level": i["collection_authority_level"],
-                    "updated_at": i["updated_at"],
-                    "moderated_status": i["moderated_status"],
-                    "dataset_query": i["dataset_query"],
-                    "id": i["id"],
-                    "table_description": i["table_description"],
-                    "dashboardcard_count": i["dashboardcard_count"],
-                    "initial_sync_status": i["initial_sync_status"],
-                    "table_name": i["table_name"],
-                    "model": i["model"],
-                    "collection": {
-                        k.replace("collection_", ""): v
-                        for k, v in i.items()
-                        if k.startswith("collection_")
-                    },
+                    k: v for k, v in i.items() if not k.startswith("collection_")
                 }
+                for k, v in i.items():
+                    if k.startswith("collection_"):
+                        current[k.removeprefix("collection_")] = v
                 if current["model"] not in available_models:
                     available_models.append(current["model"])
                 final_result.append(current)

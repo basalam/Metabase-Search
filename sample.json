@@ -8,33 +8,47 @@
       "table_id": null,
       "bookmark": false,
       "database_id": null,
-      "name": "Sample Dashboard",
-      "app_id": null,
+      "name": "Sample Data",
       "table_schema": null,
       "collection_authority_level": null,
-      "updated_at": "2022-08-30T08:20:52.607119Z",
+      "updated_at": "2021-06-07T07:44:57.636835Z",
       "moderated_status": null,
-      "dataset_query": null,
-      "id": 1,
+      "dataset_query": {
+        "type": "native",
+        "native": {
+          "query": "",
+          "template-tags": {}
+        },
+        "database": 2
+      },
+      "model_id": null,
+      "model_name": null,
+      "id": 11860,
       "table_description": null,
-      "dashboardcard_count": null,
-      "context": "this part is not returing also frontend is does not require that",
+      "dashboardcard_count": 0,
+      "context": null,
       "scores": [
-        "This part is not returing also frontend is does not require that"
+        {
+          "score": 1,
+          "name": "text-consecutivity",
+          "weight": 4,
+          "match": "Search Testtttt",
+          "match-context-thunk": "metabase.search.scoring$text_scores_with$iter__95167__95173$fn__95174$iter__95169__95175$fn__95176$fn__95177$fn__95180@6589ed8b",
+          "column": "name"
+        }
       ],
       "initial_sync_status": null,
       "table_name": null,
       "collection": {
-        "id": null,
-        "name": null,
-        "authority_level": null,
-        "app_id": null
+        "id": 1,
+        "name": "User's Personal Collection",
+        "authority_level": null
       },
-      "model": "dashboard"
+      "model": "card"
     }
   ],
   "available_models": [
-    "dashboard"
+    "card"
   ],
   "limit": 50,
   "offset": 0,
