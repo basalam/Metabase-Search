@@ -8,6 +8,14 @@ We are running the same query as metabase but faster and no bugs
 
 the goal is to reach a response that look likes `sample.json` file
 
+## Metabase Version
+
+We try to support the latest version of metabase but here we have a table that you can get help from it for selecting docker tag
+
+| DockerTag | Metabase Version |
+-|-
+|3721849|v0.45.1|
+
 ### With the help of
 
 - asyncpg
