@@ -1,4 +1,5 @@
-from typing import Any, List
+from types import NoneType
+from typing import Any, List, Union
 
 import asyncpg
 import httpx
@@ -209,7 +210,10 @@ async def search(
                         current["collection"][k.removeprefix("collection_")] = v
                 if current["model"] not in available_models:
                     available_models.append(current["model"])
-                current["dataset_query"] = orjson.loads(current["dataset_query"])
+                if isinstance(current, Union[bytes, bytearray, memoryview, str]):
+                    current["dataset_query"] = orjson.loads(current["dataset_query"])
+                else:
+                    current["dataset_query"] = None
                 current["context"] = None
                 final_result.append(current)
 
