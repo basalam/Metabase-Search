@@ -12,9 +12,10 @@ the goal is to reach a response that look likes `sample.json` file
 
 We try to support the latest version of metabase but here we have a table that you can get help from it for selecting docker tag
 
-| DockerTag | Metabase Version |
+| DockerTag | Tested Metabase version |
 -|-
 |3721849|v0.45.1|
+|ab7da37|v0.46.0|
 
 ### With the help of
 
