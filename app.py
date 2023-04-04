@@ -138,7 +138,7 @@ async def init_reqs():
 )
 @app.get("/api/search")
 async def search(
-    q: str,
+    q: str | None = None,
     archived: str = "FALSE",
     table_db_id: int | None = None,
     models: List[str] | None = None,
@@ -146,7 +146,7 @@ async def search(
     offset: int = 0,
     cookie: str = Header(),
 ):
-    if len(q) < 3:
+    if q is not None and len(q) < 3:
         return ORJSONResponse(
             {
                 "total": 0,
