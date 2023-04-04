@@ -15,7 +15,7 @@ We try to support the latest version of metabase but here we have a table that y
 | DockerTag | Tested Metabase version |
 -|-
 |3721849|v0.45.1|
-|7d89feb|v0.46.0|
+|5498835|v0.46.0|
 
 ### With the help of
 
