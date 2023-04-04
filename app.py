@@ -67,16 +67,7 @@ def brotli_cache_key_from_args(self, func, args, kwargs):
 
 app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
 
-
-@cached(
-    ttl=config.cache.ttl,
-    cache=AIOCACHE_CACHES[app.cache_backend.NAME],
-    serializer=BrotliSerializer(),
-    key_builder=cookie_cache_key_builder,
-    **app.cache_kwargs,
-)
-async def get_mb_user(cookie: str) -> httpx.Response:
-    return await app.mb_client.get("/api/user/current", headers={"Cookie": cookie})
+CACHE_BACKEND_NAME: str = "memory"
 
 
 @app.on_event("startup")
@@ -140,14 +131,27 @@ async def init_reqs():
             )
         case default:
             raise Exception("Invalid Cache Engine.!")
+    global CACHE_BACKEND_NAME
+    CACHE_BACKEND_NAME = app.cache_backend.NAME
     logging.info("Cache System Initialized.")
     logging.info("Requirements Initialized.")
+
+
+@cached(
+    ttl=config.cache.ttl,
+    cache=AIOCACHE_CACHES[CACHE_BACKEND_NAME],
+    serializer=BrotliSerializer(),
+    key_builder=cookie_cache_key_builder,
+    **app.cache_kwargs,
+)
+async def get_mb_user(cookie: str) -> httpx.Response:
+    return await app.mb_client.get("/api/user/current", headers={"Cookie": cookie})
 
 
 @app.get("/api/search")
 @cached(
     ttl=config.cache.ttl,
-    cache=AIOCACHE_CACHES[app.cache_backend.NAME],
+    cache=AIOCACHE_CACHES[CACHE_BACKEND_NAME],
     serializer=BrotliSerializer(),
     key_builder=brotli_cache_key_from_args,
     **app.cache_kwargs,
