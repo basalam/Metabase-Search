@@ -54,18 +54,14 @@ def cookie_cache_key_builder(func, cookie):
     return compress(str.encode(cookie, encoding="utf-8"), mode=MODE_TEXT)
 
 
-def brotli_cache_key_from_args(self, func, args, kwargs):
+def brotli_cache_key_from_args(func, *args, **kwargs):
     ordered_kwargs = sorted(kwargs.items())
-    key = (
-        (func.__module__ or "")
-        + func.__name__
-        + str(args[1:] if self.noself else args)
-        + str(ordered_kwargs)
-    )
+    key = (func.__module__ or "") + func.__name__ + str(args) + str(ordered_kwargs)
     return compress(str.encode(key, encoding="utf-8"), mode=MODE_TEXT)
 
 
 app = MyFastAPI(title="Metabase Search", default_response_class=ORJSONResponse)
+
 
 CACHE_BACKEND_NAME: str = "memory"
 
