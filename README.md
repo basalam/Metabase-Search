@@ -10,7 +10,7 @@ the goal is to reach a response that look likes `sample.json` file
 
 ## Metabase Version
 
-We try to support the latest version of metabase but here we have a table that you can get help from it for selecting docker tag
+We try to support the latest version of metabase but here we have a table that you can get help from it for selecting docker tag (if you are not using Docker use provided DockerTag as CommitHash when cloning/checking-out)
 
 | DockerTag | Tested Metabase version |
 -|-
@@ -38,9 +38,9 @@ also we are caching search result for 10 minutes
 
 ## How to use
 
-First of all I recommend to run `gin_index.sql` file inside your PostgreSQL, it will make your db faster when running `like` queries
+First of all I recommend to run `gin_index.sql` file inside your PostgreSQL, it will make your db faster when running `LIKE` queries
 
-> It will make postgresql Memory usage higher
+> It will make PostgreSQL Memory usage higher (Also don't forget to increase SHM Size if you are running your PostgreSQL inside Docker without that you will get some low space on device errors)
 
 Just deploy it like a normal fastapi project
 

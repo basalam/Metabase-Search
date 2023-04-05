@@ -34,7 +34,7 @@ services:
   metabase-search:
     container_name: metabase-search
     restart: always
-    image: ghcr.io/basalam/metabase-search:ab7da37
+    image: ghcr.io/basalam/metabase-search:5498835
     ports:
       - 127.0.0.1:3001:80 # recommended for debuging, etc.
     depends_on:
