@@ -176,12 +176,14 @@ async def search(
     conditions: str = ""
     archived = archived.upper()
     if archived not in ["TRUE", "FALSE"]:
-        raise HTTPException(status_code=400, detail="Archived should be true or false")
+        return ORJSONResponse(
+            {message: "Archived should be true or false"}, status_code=400
+        )
     r: str | httpx.Response = await get_mb_user(cookie=cookie)
     resp: dict = {}
     if isinstance(r, httpx.Response):
         if r.status_code not in range(200, 300):
-            await app.cache_backend.delete(key=decompress(cookie).decode("utf-8"))
+            await app.cache_backend.delete(key=cookie_cache_key_builder(None, cookie))
             return Response(r.content, r.status_code, headers=r.headers)
         resp = r.json()
     elif isinstance(r, str):
