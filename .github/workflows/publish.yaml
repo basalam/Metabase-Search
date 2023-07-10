@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@ecf95283f03858871ff00b787d79c419715afc34
+        uses: docker/setup-buildx-action@2a1a44ac4aa01993040736bd95bb470da1a38365
 
       - name: Log into registry ${{ env.REGISTRY }}
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
