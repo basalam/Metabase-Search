@@ -1,5 +1,7 @@
 # Metabase Search
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/7b29b7293f5364b50b8e/maintainability)](https://codeclimate.com/github/basalam/Metabase-Search/maintainability)
+
 Better searching for [metabase](https://github.com/metabase/metabase/)
 
 ## How it works?
