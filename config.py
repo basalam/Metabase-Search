@@ -34,9 +34,9 @@ class DBSettings(BaseModel):
 
         password = quote(values["password"], safe="")
         user = quote(values["user"], safe="")
-        values[
-            "conn_str"
-        ] = f"postgres://{user}:{password}@{values['host']}:{values['port']}/{values['dbname']}"
+        values["conn_str"] = (
+            f"postgres://{user}:{password}@{values['host']}:{values['port']}/{values['dbname']}"
+        )
         return values
 
 
