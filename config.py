@@ -2,7 +2,7 @@ from enum import Enum
 from urllib.parse import quote
 
 from brotli import MODE_TEXT, compress
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,7 +28,7 @@ class DBSettings(BaseModel):
     conn_str: None | str = None
     search_query: None | str = None
 
-    @root_validator
+    @model_validator(mode='before')
     def initialize(cls, values):
         with open("./search_query.sql", "rb") as f:
             values["search_query"] = compress(f.read(), mode=MODE_TEXT)
