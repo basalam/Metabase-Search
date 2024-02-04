@@ -2,7 +2,8 @@ from enum import Enum
 from urllib.parse import quote
 
 from brotli import MODE_TEXT, compress
-from pydantic import BaseModel, BaseSettings, root_validator
+from pydantic import BaseModel, root_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class DBEngine(Enum):
@@ -52,20 +53,15 @@ class CacheSettings(BaseModel):
     port: int | None = None
     db: int | None = None
     password: str | None = None
-    pool_min_size: int | None
-    pool_max_size: int | None
+    pool_min_size: int | None = None
+    pool_max_size: int | None = None
 
 
 class Settings(BaseSettings):
     mb: MBSettings
     db: DBSettings
     cache: CacheSettings
-
-    class Config:
-        case_sensitive = False
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        env_nested_delimiter = "__"
+    model_config = SettingsConfigDict(case_sensitive=False, env_file=".env", env_file_encoding="utf-8", env_nested_delimiter="__")
 
 
 config = Settings()  # type: ignore

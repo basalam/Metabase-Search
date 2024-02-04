@@ -3,6 +3,7 @@ httpx[http2,brotli]
 fastapi
 orjson
 pydantic[dotenv]
+pydantic-settings
 pylibmc
 redis
 uvicorn
