@@ -28,7 +28,7 @@ class DBSettings(BaseModel):
     conn_str: None | str = None
     search_query: None | str = None
 
-    @model_validator(mode='before')
+    @model_validator(mode="before")
     def initialize(cls, values):
         with open("./search_query.sql", "rb") as f:
             values["search_query"] = compress(f.read(), mode=MODE_TEXT)
