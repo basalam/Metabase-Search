@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 from urllib.parse import quote
 
 from brotli import MODE_TEXT, compress
@@ -26,7 +27,7 @@ class DBSettings(BaseModel):
     min_connections: int = 1
     max_connections: int = 25
     conn_str: None | str = None
-    search_query: None | str = None
+    search_query: None | Any = None
 
     @model_validator(mode="before")
     def initialize(cls, values):
