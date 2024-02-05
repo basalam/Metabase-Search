@@ -18,6 +18,7 @@ We try to support the latest version of metabase but here we have a table that y
 -|-
 |3721849|v0.45.X|
 |5498835|v0.46.X|
+|651d0f9|v0.47.X|
 
 ### With the help of
 
